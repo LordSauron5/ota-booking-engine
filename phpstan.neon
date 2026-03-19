@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app
+        - tests
+
+    level: 5          # start here; move to 8 later
+    checkModelProperties: true
+    excludePaths:
+        - database/migrations/*.stub
+    
+    ignoreErrors:
+        # Pest tests use $this bound to Laravel TestCase, but PHPStan doesn't understand this (yet)
+        -
+            message: '#Call to an undefined method PHPUnit\\Framework\\TestCase::#'
+            path: tests/*
