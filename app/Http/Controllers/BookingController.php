@@ -68,4 +68,38 @@ class BookingController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function status(Booking $booking): JsonResponse
+    {
+        $ownedByUser = auth()->check() && $booking->user_id === auth()->id();
+        $ownedBySession = $booking->session_token === session()->getId();
+
+        if (! $ownedByUser && ! $ownedBySession) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        // Force a fresh read from the database — never serve a cached model
+        $booking->refresh();
+
+        return response()->json([
+            'status' => $booking->status,
+            'reference' => $booking->reference,
+            'channel_manager_ref' => $booking->channel_manager_ref,
+        ]);
+    }
+
+    public function retry(Booking $booking): JsonResponse
+    {
+        if (! auth()->check() || $booking->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $result = $this->bookingService->retryFailed($booking);
+
+        if ($result !== true) {
+            return response()->json(['message' => $result], 422);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }
