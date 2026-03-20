@@ -8,6 +8,17 @@ export interface Guests {
     children: number;
 }
 
+export interface Unit {
+    id: number;
+    name: string;
+    description: string;
+    max_guests: number;
+    pricing_model: string;
+    price: number;
+    available_count: number;
+    pictures: string[];
+}
+
 export const useBookingStore = defineStore('booking', () => {
     // --- Navigation ----------------------------------
     const currentStep = ref<BookingStep>(1);
@@ -15,6 +26,11 @@ export const useBookingStore = defineStore('booking', () => {
     // --- Step 1 ----------------------------------
     const checkIn  = ref<string | null>(null);
     const checkOut = ref<string | null>(null);
+
+    // --- Step 2 ----------------------------------
+    const selectedUnit    = ref<Unit | null>(null);
+    const quantity        = ref<number>(1);
+    const guests          = ref<Guests>({ adults: 1, children: 0 });
 
     // --- Computed ----------------------------------
     const nights = computed<number>(() => {
@@ -27,10 +43,35 @@ export const useBookingStore = defineStore('booking', () => {
         return Math.round(diff / (1000 * 60 * 60 * 24));
     });
 
+    const basePrice = computed<number>(() => {
+        if (!selectedUnit.value || nights.value === 0) {
+            return 0;
+        }
+        
+        return selectedUnit.value.price * quantity.value * nights.value;
+    });
+
+    const taxAmount = computed<number>(() => {
+        return parseFloat((basePrice.value * 0.15).toFixed(2));
+    });
+
+    const totalPrice = computed<number>(() => {
+        return parseFloat((basePrice.value + taxAmount.value).toFixed(2));
+    });
+
+    const totalGuests = computed<number>(() => {
+        return guests.value.adults + guests.value.children;
+    });
+
     // --- Step Validity Guards ----------------------------------
     const stepOneValid = computed<boolean>(() =>
         !!checkIn.value && !!checkOut.value && nights.value > 0
     );
+
+    const stepTwoValid = computed<boolean>(() =>
+        !!selectedUnit.value && quantity.value >= 1 && guests.value.adults >= 1
+    );
+
 
     // --- Actions ----------------------------------
     function goToStep(step: BookingStep) {
@@ -53,13 +94,17 @@ export const useBookingStore = defineStore('booking', () => {
         currentStep.value = 1;
         checkIn.value     = null;
         checkOut.value    = null;
+        selectedUnit.value = null;
+        quantity.value    = 1;
+        guests.value      = { adults: 1, children: 0 };
     }
 
     return {
-        currentStep, checkIn, checkOut, 
-        nights,
+        currentStep, checkIn, checkOut,
+        selectedUnit, quantity, guests,
+        nights, basePrice, taxAmount, totalPrice, totalGuests,
         goToStep, nextStep, prevStep, reset,
-        stepOneValid,
+        stepOneValid, stepTwoValid,
     };
 }, {
     persist: {

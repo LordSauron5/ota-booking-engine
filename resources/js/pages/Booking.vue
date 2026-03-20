@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 
-import { useBookingStore } from '@/stores/bookingStore';
-
+import StepConfirm from '@/components/booking/StepConfirm.vue';
 import StepDates   from '@/components/booking/StepDates.vue';
 import StepRooms   from '@/components/booking/StepRooms.vue';
-import StepSummary from '@/components/booking/StepSummary.vue';
-import StepConfirm from '@/components/booking/StepConfirm.vue';
 import StepStatus  from '@/components/booking/StepStatus.vue';
+import StepSummary from '@/components/booking/StepSummary.vue';
+
+import { useBookingStore } from '@/stores/bookingStore';
+import type { Unit } from '@/stores/bookingStore';
+
+const props = defineProps<{
+    property: { id: number; name: string; currency: string; tax_rate: number };
+    units: Unit[];
+}>();
 
 const store = useBookingStore();
 
@@ -19,11 +24,8 @@ const steps = [
     { number: 5, label: 'Status'  },
 ];
 
-const canNavigateTo = (step: number): boolean => {
-    if (step <= store.currentStep) return true;
-    
-    return false;
-};
+const canNavigateTo = (step: number): boolean =>
+    step <= store.currentStep || (step === 2 && store.stepOneValid);
 </script>
 
 <template>
@@ -86,6 +88,7 @@ const canNavigateTo = (step: number): boolean => {
                     <StepRooms
                         v-else-if="store.currentStep === 2"
                         key="step-2"
+                        :units="units"
                     />
                     <StepSummary
                         v-else-if="store.currentStep === 3"
