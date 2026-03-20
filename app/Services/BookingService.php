@@ -147,10 +147,10 @@ class BookingService
                 );
 
                 $booking->update([
-                    'base_price'  => $pricing['basePrice'],
-                    'tax_amount'  => $pricing['taxAmount'],
+                    'base_price' => $pricing['basePrice'],
+                    'tax_amount' => $pricing['taxAmount'],
                     'total_price' => $pricing['total'],
-                    'status'      => 'pending',
+                    'status' => 'pending',
                 ]);
 
                 dispatch(new BookWithChannelManager($booking));

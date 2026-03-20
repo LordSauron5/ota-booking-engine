@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ClaimBookingRequest;
+use App\Http\Requests\ConfirmBookingRequest;
 use App\Http\Requests\StoreDraftBookingRequest;
 use App\Models\Booking;
 use App\Services\BookingService;
@@ -42,17 +44,12 @@ class BookingController extends Controller
         ]);
     }
 
-    public function claim(Request $request, Booking $booking): JsonResponse
+    public function claim(ClaimBookingRequest $request, Booking $booking): JsonResponse
     {
-        if (! auth()->check()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
         $result = $this->bookingService->claimDraft($booking);
 
         if ($result !== true) {
             $status = str_contains($result, 'expired') ? 403 : 422;
-            // "already claimed by someone else" is a 403
             $status = str_contains($result, 'already claimed') ? 403 : $status;
 
             return response()->json(['message' => $result], $status);
@@ -61,24 +58,9 @@ class BookingController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function confirm(Request $request, Booking $booking): JsonResponse
+    public function confirm(ConfirmBookingRequest $request, Booking $booking): JsonResponse
     {
-        if (! auth()->check()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        if ($booking->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
-        }
-
-        $unit = collect($this->roomService->getRooms())
-            ->firstWhere('id', $booking->unit_id);
-
-        if (! $unit) {
-            return response()->json(['message' => 'Room no longer available.'], 422);
-        }
-
-        $result = $this->bookingService->confirmDraft($booking, $unit);
+        $result = $this->bookingService->confirmDraft($booking, $request->unit());
 
         if ($result !== true) {
             return response()->json(['message' => $result], 422);
