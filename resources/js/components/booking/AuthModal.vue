@@ -1,8 +1,7 @@
 <script setup lang="ts">
+import { Loader2, LogIn, UserPlus } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
@@ -10,6 +9,8 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Tabs,
     TabsContent,
@@ -17,7 +18,6 @@ import {
     TabsTrigger,
 } from '@/components/ui/tabs';
 import { buildHeaders } from '@/composables/useHttp';
-import { Loader2, LogIn, UserPlus } from 'lucide-vue-next';
 import { useBookingStore } from '@/stores/bookingStore';
 
 const props = defineProps<{

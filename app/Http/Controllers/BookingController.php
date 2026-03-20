@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDraftBookingRequest;
+use App\Models\Booking;
 use App\Services\BookingService;
 use App\Services\RoomService;
 use Illuminate\Http\JsonResponse;
@@ -39,5 +40,24 @@ class BookingController extends Controller
             'booking_id' => $booking->id,
             'reference' => $booking->reference,
         ]);
+    }
+
+    public function claim(Request $request, Booking $booking): JsonResponse
+    {
+        if (! auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $result = $this->bookingService->claimDraft($booking);
+
+        if ($result !== true) {
+            $status = str_contains($result, 'expired') ? 403 : 422;
+            // "already claimed by someone else" is a 403
+            $status = str_contains($result, 'already claimed') ? 403 : $status;
+
+            return response()->json(['message' => $result], $status);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

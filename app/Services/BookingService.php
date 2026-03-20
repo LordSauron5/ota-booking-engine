@@ -66,4 +66,39 @@ class BookingService
             ]
         );
     }
+
+    // ── Claim ─────────────────────────────────────────────────────────────
+
+    /**
+     * Attach an authenticated user to a guest-created draft.
+     *
+     * After Fortify login/register the session ID regenerates, so we can't
+     * re-verify via session_token here. We rely on the booking still being
+     * a draft with no owner and a valid expiry window.
+     *
+     * Returns true on success, or a string error message on failure.
+     */
+    public function claimDraft(Booking $booking): true|string
+    {
+        // Already owned — idempotent success for the current user
+        if ($booking->user_id !== null) {
+            if ($booking->user_id === auth()->id()) {
+                return true;
+            }
+
+            return 'Booking already claimed.';
+        }
+
+        if ($booking->status !== 'draft') {
+            return 'Booking is no longer a draft.';
+        }
+
+        if ($booking->session_token_expires_at->isPast()) {
+            return 'Session expired. Please start again.';
+        }
+
+        $booking->update(['user_id' => auth()->id()]);
+
+        return true;
+    }
 }
