@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('tax_amount', 10, 2);
             $table->decimal('total_price', 10, 2);
             $table->enum('status', ['draft', 'pending', 'confirmed', 'failed'])
-                  ->default('draft');
+                ->default('draft');
             $table->string('channel_manager_ref')->nullable();
             $table->timestamps();
         });

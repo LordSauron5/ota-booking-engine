@@ -27,14 +27,14 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'guests'                   => 'array',
+        'guests' => 'array',
         'session_token_expires_at' => 'datetime',
-        'check_in'                 => 'date',
-        'check_out'                => 'date',
-        'price_per_unit'           => 'decimal:2',
-        'base_price'               => 'decimal:2',
-        'tax_amount'               => 'decimal:2',
-        'total_price'              => 'decimal:2',
+        'check_in' => 'date',
+        'check_out' => 'date',
+        'price_per_unit' => 'decimal:2',
+        'base_price' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total_price' => 'decimal:2',
     ];
 
     public function user(): BelongsTo
