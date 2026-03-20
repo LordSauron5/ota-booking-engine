@@ -1,20 +1,9 @@
 <script setup lang="ts">
-import {
-    CalendarDays,
-    BedDouble,
-    Users,
-    Info,
-    Loader2,
-} from 'lucide-vue-next';
+import { CalendarDays, BedDouble, Users, Info, Loader2 } from 'lucide-vue-next';
 
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
     Tooltip,
@@ -56,18 +45,19 @@ async function saveDraft() {
             method: 'POST',
             headers: buildHeaders(),
             body: JSON.stringify({
-                unit_id:    store.selectedUnit.id,
-                check_in:   store.checkIn,
-                check_out:  store.checkOut,
-                quantity:   store.quantity,
-                guests:     store.guests,
+                unit_id: store.selectedUnit.id,
+                check_in: store.checkIn,
+                check_out: store.checkOut,
+                quantity: store.quantity,
+                guests: store.guests,
             }),
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            errorMessage.value = data.message ?? 'Something went wrong. Please try again.';
+            errorMessage.value =
+                data.message ?? 'Something went wrong. Please try again.';
 
             return;
         }
@@ -76,7 +66,6 @@ async function saveDraft() {
         store.bookingId = data.booking_id;
         store.reference = data.reference;
         store.nextStep();
-
     } catch {
         errorMessage.value = 'A network error occurred. Please try again.';
     } finally {
@@ -87,51 +76,63 @@ async function saveDraft() {
 
 <template>
     <div>
-        <h2 class="text-lg font-medium mb-1">Booking summary</h2>
-        <p class="text-sm text-muted-foreground mb-6">
+        <h2 class="mb-1 text-lg font-medium">Booking summary</h2>
+        <p class="mb-6 text-sm text-muted-foreground">
             Review your details before confirming.
         </p>
 
         <div class="flex flex-col gap-4">
-
             <!-- Property -->
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                    <CardTitle
+                        class="text-sm font-medium tracking-wide text-muted-foreground uppercase"
+                    >
                         Property
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p class="font-medium text-foreground">{{ property.name }}</p>
+                    <p class="font-medium text-foreground">
+                        {{ property.name }}
+                    </p>
                 </CardContent>
             </Card>
 
             <!-- Dates -->
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                        <CalendarDays class="w-3.5 h-3.5" aria-hidden="true" />
+                    <CardTitle
+                        class="flex items-center gap-1.5 text-sm font-medium tracking-wide text-muted-foreground uppercase"
+                    >
+                        <CalendarDays class="h-3.5 w-3.5" aria-hidden="true" />
                         Dates
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="grid grid-cols-3 gap-2 text-sm">
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Check-in</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Check-in
+                            </p>
                             <p class="font-medium text-foreground">
                                 {{ formatDate(store.checkIn) }}
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Check-out</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Check-out
+                            </p>
                             <p class="font-medium text-foreground">
                                 {{ formatDate(store.checkOut) }}
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Duration</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Duration
+                            </p>
                             <p class="font-medium text-foreground">
-                                {{ store.nights }} {{ store.nights === 1 ? 'night' : 'nights' }}
+                                {{ store.nights }}
+                                {{ store.nights === 1 ? 'night' : 'nights' }}
                             </p>
                         </div>
                     </div>
@@ -141,25 +142,37 @@ async function saveDraft() {
             <!-- Room -->
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                        <BedDouble class="w-3.5 h-3.5" aria-hidden="true" />
+                    <CardTitle
+                        class="flex items-center gap-1.5 text-sm font-medium tracking-wide text-muted-foreground uppercase"
+                    >
+                        <BedDouble class="h-3.5 w-3.5" aria-hidden="true" />
                         Room
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="flex justify-between items-start text-sm">
+                    <div class="flex items-start justify-between text-sm">
                         <div>
                             <p class="font-medium text-foreground">
                                 {{ store.selectedUnit?.name }}
                             </p>
-                            <p class="text-xs text-muted-foreground mt-0.5">
+                            <p class="mt-0.5 text-xs text-muted-foreground">
                                 {{ store.quantity }}
                                 {{ store.quantity === 1 ? 'room' : 'rooms' }}
-                                × {{ formatPrice(store.selectedUnit?.price ?? 0) }} / night
+                                ×
+                                {{
+                                    formatPrice(store.selectedUnit?.price ?? 0)
+                                }}
+                                / night
                             </p>
                         </div>
-                        <p class="font-medium text-foreground shrink-0">
-                            {{ formatPrice((store.selectedUnit?.price ?? 0) * store.quantity * store.nights) }}
+                        <p class="shrink-0 font-medium text-foreground">
+                            {{
+                                formatPrice(
+                                    (store.selectedUnit?.price ?? 0) *
+                                        store.quantity *
+                                        store.nights,
+                                )
+                            }}
                         </p>
                     </div>
                 </CardContent>
@@ -168,24 +181,38 @@ async function saveDraft() {
             <!-- Guests -->
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                        <Users class="w-3.5 h-3.5" aria-hidden="true" />
+                    <CardTitle
+                        class="flex items-center gap-1.5 text-sm font-medium tracking-wide text-muted-foreground uppercase"
+                    >
+                        <Users class="h-3.5 w-3.5" aria-hidden="true" />
                         Guests
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="flex gap-4 text-sm">
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Adults</p>
-                            <p class="font-medium text-foreground">{{ store.guests.adults }}</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Adults
+                            </p>
+                            <p class="font-medium text-foreground">
+                                {{ store.guests.adults }}
+                            </p>
                         </div>
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Children</p>
-                            <p class="font-medium text-foreground">{{ store.guests.children }}</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Children
+                            </p>
+                            <p class="font-medium text-foreground">
+                                {{ store.guests.children }}
+                            </p>
                         </div>
                         <div>
-                            <p class="text-xs text-muted-foreground mb-0.5">Total</p>
-                            <p class="font-medium text-foreground">{{ store.totalGuests }}</p>
+                            <p class="mb-0.5 text-xs text-muted-foreground">
+                                Total
+                            </p>
+                            <p class="font-medium text-foreground">
+                                {{ store.totalGuests }}
+                            </p>
                         </div>
                     </div>
                 </CardContent>
@@ -194,13 +221,18 @@ async function saveDraft() {
             <!-- Price breakdown -->
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                    <CardTitle
+                        class="text-sm font-medium tracking-wide text-muted-foreground uppercase"
+                    >
                         Price breakdown
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="flex flex-col gap-2 text-sm" role="region" aria-label="Price breakdown">
-
+                    <div
+                        class="flex flex-col gap-2 text-sm"
+                        role="region"
+                        aria-label="Price breakdown"
+                    >
                         <!-- Base price line -->
                         <div class="flex justify-between text-muted-foreground">
                             <span>
@@ -221,23 +253,25 @@ async function saveDraft() {
                         <Separator class="my-1" />
 
                         <!-- Total with VAT tooltip -->
-                        <div class="flex justify-between items-center font-semibold text-foreground">
+                        <div
+                            class="flex items-center justify-between font-semibold text-foreground"
+                        >
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger
-                                        class="flex items-center gap-1 underline decoration-dotted underline-offset-4 cursor-help"
+                                        class="flex cursor-help items-center gap-1 underline decoration-dotted underline-offset-4"
                                         aria-describedby="vat-tooltip"
                                     >
                                         <span>Total</span>
                                         <Info
-                                            class="w-3.5 h-3.5 text-muted-foreground"
+                                            class="h-3.5 w-3.5 text-muted-foreground"
                                             aria-hidden="true"
                                         />
                                     </TooltipTrigger>
                                     <TooltipContent
                                         id="vat-tooltip"
                                         side="top"
-                                        class="text-xs max-w-[200px] text-center"
+                                        class="max-w-[200px] text-center text-xs"
                                     >
                                         Includes VAT of
                                         <span class="font-semibold">
@@ -247,7 +281,9 @@ async function saveDraft() {
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
-                            <span aria-live="polite">{{ formatPrice(store.totalPrice) }}</span>
+                            <span aria-live="polite">{{
+                                formatPrice(store.totalPrice)
+                            }}</span>
                         </div>
                     </div>
                 </CardContent>
@@ -257,14 +293,14 @@ async function saveDraft() {
         <!-- Edit links -->
         <div class="mt-4 flex gap-3 text-sm">
             <button
-                class="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                class="rounded text-primary underline underline-offset-4 transition-colors hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 @click="store.goToStep(1)"
             >
                 Edit dates
             </button>
             <span class="text-muted-foreground" aria-hidden="true">·</span>
             <button
-                class="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                class="rounded text-primary underline underline-offset-4 transition-colors hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 @click="store.goToStep(2)"
             >
                 Edit room
@@ -297,7 +333,7 @@ async function saveDraft() {
             >
                 <Loader2
                     v-if="isSubmitting"
-                    class="w-4 h-4 mr-2 animate-spin"
+                    class="mr-2 h-4 w-4 animate-spin"
                     aria-hidden="true"
                 />
                 {{ isSubmitting ? 'Saving...' : 'Continue' }}

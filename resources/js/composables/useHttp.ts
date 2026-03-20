@@ -1,13 +1,17 @@
 function getCsrfToken(): string {
-    return document
-        .querySelector('meta[name="csrf-token"]')
-        ?.getAttribute('content') ?? '';
+    return (
+        document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content') ?? ''
+    );
 }
 
-export function buildHeaders(extra: Record<string, string> = {}): Record<string, string> {
+export function buildHeaders(
+    extra: Record<string, string> = {},
+): Record<string, string> {
     return {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'X-CSRF-TOKEN': getCsrfToken(),
         'X-Requested-With': 'XMLHttpRequest',
         ...extra,

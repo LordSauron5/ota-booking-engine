@@ -9,12 +9,12 @@ import { useHttp } from '@/composables/useHttp';
 import { useBookingStore } from '@/stores/bookingStore';
 
 const store = useBookingStore();
-const page  = usePage();
+const page = usePage();
 const { formatPrice } = useFormatters();
 const { buildHeaders } = useHttp();
 
 const isAuthenticated = computed(() => !!page.props.auth?.user);
-const showAuthModal   = ref(false);
+const showAuthModal = ref(false);
 
 onMounted(() => {
     if (!isAuthenticated.value) {
@@ -48,53 +48,72 @@ async function confirmBooking() {
         }
 
         store.nextStep();
-
     } catch {
         confirmError.value = 'A network error occurred. Please try again.';
     } finally {
         isConfirming.value = false;
     }
 }
-
 </script>
 
 <template>
     <div>
-        <h2 class="text-lg font-medium mb-1">Confirm your booking</h2>
-        <p class="text-sm text-muted-foreground mb-6">
+        <h2 class="mb-1 text-lg font-medium">Confirm your booking</h2>
+        <p class="mb-6 text-sm text-muted-foreground">
             You're one step away from completing your reservation.
         </p>
 
         <!-- Authenticated view -->
         <template v-if="isAuthenticated">
-            <div class="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
-                <CheckCircle class="w-4 h-4 text-green-500" aria-hidden="true" />
+            <div
+                class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+            >
+                <CheckCircle
+                    class="h-4 w-4 text-green-500"
+                    aria-hidden="true"
+                />
                 Signed in as
                 <span class="font-medium text-foreground">
                     {{ (page.props.auth as any).user.email }}
                 </span>
             </div>
 
-            <div class="border border-border rounded-xl p-4 mb-6">
-                <p class="text-sm text-muted-foreground mb-1">Total due</p>
+            <div class="mb-6 rounded-xl border border-border p-4">
+                <p class="mb-1 text-sm text-muted-foreground">Total due</p>
                 <p class="text-2xl font-semibold text-foreground">
                     {{ formatPrice(store.totalPrice) }}
                 </p>
-                <p class="text-xs text-muted-foreground mt-0.5">
+                <p class="mt-0.5 text-xs text-muted-foreground">
                     Includes VAT of {{ formatPrice(store.taxAmount) }}
                 </p>
             </div>
 
-            <p v-if="confirmError" role="alert" class="mb-4 text-sm text-destructive">
+            <p
+                v-if="confirmError"
+                role="alert"
+                class="mb-4 text-sm text-destructive"
+            >
                 {{ confirmError }}
             </p>
 
             <div class="flex justify-between">
-                <Button variant="outline" :disabled="isConfirming" @click="store.prevStep()">
+                <Button
+                    variant="outline"
+                    :disabled="isConfirming"
+                    @click="store.prevStep()"
+                >
                     Back
                 </Button>
-                <Button :disabled="isConfirming" aria-label="Confirm and submit booking" @click="confirmBooking">
-                    <Loader2 v-if="isConfirming" class="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                <Button
+                    :disabled="isConfirming"
+                    aria-label="Confirm and submit booking"
+                    @click="confirmBooking"
+                >
+                    <Loader2
+                        v-if="isConfirming"
+                        class="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                    />
                     {{ isConfirming ? 'Submitting...' : 'Confirm booking' }}
                 </Button>
             </div>
@@ -102,16 +121,29 @@ async function confirmBooking() {
 
         <!-- Guest view -->
         <template v-else>
-            <div class="border border-border rounded-xl p-6 text-center" role="status">
-                <LogIn class="w-8 h-8 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
-                <p class="font-medium text-foreground mb-1">Sign in to complete your booking</p>
-                <p class="text-sm text-muted-foreground mb-4">
-                    Your selections have been saved. Signing in won't affect them.
+            <div
+                class="rounded-xl border border-border p-6 text-center"
+                role="status"
+            >
+                <LogIn
+                    class="mx-auto mb-3 h-8 w-8 text-muted-foreground"
+                    aria-hidden="true"
+                />
+                <p class="mb-1 font-medium text-foreground">
+                    Sign in to complete your booking
                 </p>
-                <Button @click="showAuthModal = true">Sign in or create account</Button>
+                <p class="mb-4 text-sm text-muted-foreground">
+                    Your selections have been saved. Signing in won't affect
+                    them.
+                </p>
+                <Button @click="showAuthModal = true"
+                    >Sign in or create account</Button
+                >
             </div>
             <div class="mt-4">
-                <Button variant="outline" @click="store.prevStep()">Back</Button>
+                <Button variant="outline" @click="store.prevStep()"
+                    >Back</Button
+                >
             </div>
         </template>
 

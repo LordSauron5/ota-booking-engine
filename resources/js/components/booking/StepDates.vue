@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { CalendarDate, DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
+import {
+    CalendarDate,
+    DateFormatter,
+    getLocalTimeZone,
+    today,
+} from '@internationalized/date';
 import { Calendar as CalendarIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -20,8 +25,12 @@ const todayDate = today(getLocalTimeZone());
 // ── Helpers to convert between string (store) and CalendarDate (shadcn) ──
 
 function toCalendarDate(str: string | null): CalendarDate | undefined {
-    if (!str) return undefined;
+    if (!str) {
+        return undefined;
+    }
+
     const [y, m, d] = str.split('-').map(Number);
+
     return new CalendarDate(y, m, d);
 }
 
@@ -39,6 +48,7 @@ const checkInValue = computed({
         // If check-out is now before or equal to new check-in, clear it
         if (store.checkOut && val) {
             const out = toCalendarDate(store.checkOut);
+
             if (out && out.compare(val) <= 0) {
                 store.checkOut = null;
             }
@@ -56,11 +66,15 @@ const checkOutValue = computed({
 // ── Display labels ────────────────────────────────────────────────────────
 
 const checkInLabel = computed(() =>
-    checkInValue.value ? df.format(checkInValue.value.toDate(getLocalTimeZone())) : 'Select date'
+    checkInValue.value
+        ? df.format(checkInValue.value.toDate(getLocalTimeZone()))
+        : 'Select date',
 );
 
 const checkOutLabel = computed(() =>
-    checkOutValue.value ? df.format(checkOutValue.value.toDate(getLocalTimeZone())) : 'Select date'
+    checkOutValue.value
+        ? df.format(checkOutValue.value.toDate(getLocalTimeZone()))
+        : 'Select date',
 );
 
 // ── Disabled date logic ───────────────────────────────────────────────────
@@ -86,13 +100,12 @@ const nightsLabel = computed(() => {
 
 <template>
     <div>
-        <h2 class="text-lg font-medium mb-1">Select your dates</h2>
-        <p class="text-sm text-muted-foreground mb-6">
+        <h2 class="mb-1 text-lg font-medium">Select your dates</h2>
+        <p class="mb-6 text-sm text-muted-foreground">
             Choose your check-in and check-out dates.
         </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <!-- Check-in -->
             <div class="flex flex-col gap-1.5">
                 <label
@@ -106,11 +119,16 @@ const nightsLabel = computed(() => {
                         <Button
                             variant="outline"
                             aria-labelledby="check-in-label"
-                            :aria-describedby="checkInValue ? 'check-in-value' : undefined"
+                            :aria-describedby="
+                                checkInValue ? 'check-in-value' : undefined
+                            "
                             class="w-full justify-start text-left font-normal"
                             :class="!checkInValue && 'text-muted-foreground'"
                         >
-                            <CalendarIcon class="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
+                            <CalendarIcon
+                                class="mr-2 h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                            />
                             <span id="check-in-value">{{ checkInLabel }}</span>
                         </Button>
                     </PopoverTrigger>
@@ -137,13 +155,20 @@ const nightsLabel = computed(() => {
                         <Button
                             variant="outline"
                             aria-labelledby="check-out-label"
-                            :aria-describedby="checkOutValue ? 'check-out-value' : undefined"
+                            :aria-describedby="
+                                checkOutValue ? 'check-out-value' : undefined
+                            "
                             class="w-full justify-start text-left font-normal"
                             :class="!checkOutValue && 'text-muted-foreground'"
                             :disabled="!checkInValue"
                         >
-                            <CalendarIcon class="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
-                            <span id="check-out-value">{{ checkOutLabel }}</span>
+                            <CalendarIcon
+                                class="mr-2 h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            <span id="check-out-value">{{
+                                checkOutLabel
+                            }}</span>
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent class="w-auto p-0" align="start">
@@ -171,7 +196,10 @@ const nightsLabel = computed(() => {
             aria-live="polite"
             class="mt-6 flex items-center gap-2 text-sm text-muted-foreground"
         >
-            <span class="inline-block w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+            <span
+                class="inline-block h-2 w-2 rounded-full bg-primary"
+                aria-hidden="true"
+            />
             {{ nightsLabel }} selected
             <span class="mx-1">·</span>
             {{ checkInLabel }} → {{ checkOutLabel }}

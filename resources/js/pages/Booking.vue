@@ -1,16 +1,15 @@
 <script setup lang="ts">
-
-import BookingNav  from '@/components/booking/BookingNav.vue';
+import BookingNav from '@/components/booking/BookingNav.vue';
 import StepConfirm from '@/components/booking/StepConfirm.vue';
-import StepDates   from '@/components/booking/StepDates.vue';
-import StepRooms   from '@/components/booking/StepRooms.vue';
-import StepStatus  from '@/components/booking/StepStatus.vue';
+import StepDates from '@/components/booking/StepDates.vue';
+import StepRooms from '@/components/booking/StepRooms.vue';
+import StepStatus from '@/components/booking/StepStatus.vue';
 import StepSummary from '@/components/booking/StepSummary.vue';
 
 import { useBookingStore } from '@/stores/bookingStore';
 import type { Unit } from '@/stores/bookingStore';
 
-const props = defineProps<{
+defineProps<{
     property: { id: number; name: string; currency: string; tax_rate: number };
     units: Unit[];
 }>();
@@ -18,35 +17,31 @@ const props = defineProps<{
 const store = useBookingStore();
 
 const steps = [
-    { number: 1, label: 'Dates'   },
-    { number: 2, label: 'Rooms'   },
+    { number: 1, label: 'Dates' },
+    { number: 2, label: 'Rooms' },
     { number: 3, label: 'Summary' },
     { number: 4, label: 'Confirm' },
-    { number: 5, label: 'Status'  },
+    { number: 5, label: 'Status' },
 ];
 
 const canNavigateTo = (step: number): boolean =>
     step <= store.currentStep ||
     (step === 2 && store.stepOneValid) ||
     (step === 3 && store.stepOneValid && store.stepTwoValid);
-
 </script>
 
 <template>
     <div class="min-h-screen bg-background">
-
         <!-- Persistent nav — always visible across all steps -->
         <BookingNav :property-name="property.name" />
-        
-        <div class="max-w-3xl mx-auto py-10 px-4">
-            
 
+        <div class="mx-auto max-w-3xl px-4 py-10">
             <!-- Stepper nav -->
             <nav aria-label="Booking steps" class="mb-10">
-                <ol class="flex items-center justify-between relative">
+                <ol class="relative flex items-center justify-between">
                     <li
                         aria-hidden="true"
-                        class="absolute top-4 left-0 right-0 h-px bg-border -z-10"
+                        class="absolute top-4 right-0 left-0 -z-10 h-px bg-border"
                     />
                     <li
                         v-for="step in steps"
@@ -54,27 +49,36 @@ const canNavigateTo = (step: number): boolean =>
                         class="flex flex-col items-center gap-1"
                     >
                         <button
-                            :aria-current="store.currentStep === step.number ? 'step' : undefined"
+                            :aria-current="
+                                store.currentStep === step.number
+                                    ? 'step'
+                                    : undefined
+                            "
                             :aria-label="`Step ${step.number}: ${step.label}`"
                             :disabled="!canNavigateTo(step.number)"
-                            class="w-8 h-8 rounded-full border-2 text-sm font-medium flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
+                            class="flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                             :class="{
-                                'bg-primary border-primary text-primary-foreground':
+                                'border-primary bg-primary text-primary-foreground':
                                     store.currentStep === step.number,
-                                'bg-primary/20 border-primary text-primary':
+                                'border-primary bg-primary/20 text-primary':
                                     step.number < store.currentStep,
-                                'bg-background border-border text-muted-foreground':
+                                'border-border bg-background text-muted-foreground':
                                     step.number > store.currentStep,
                             }"
-                            @click="canNavigateTo(step.number) && store.goToStep(step.number as 1|2|3|4|5)"
+                            @click="
+                                canNavigateTo(step.number) &&
+                                store.goToStep(step.number as 1 | 2 | 3 | 4 | 5)
+                            "
                         >
                             {{ step.number }}
                         </button>
                         <span
                             class="text-xs"
-                            :class="store.currentStep === step.number
-                                ? 'text-foreground font-medium'
-                                : 'text-muted-foreground'"
+                            :class="
+                                store.currentStep === step.number
+                                    ? 'font-medium text-foreground'
+                                    : 'text-muted-foreground'
+                            "
                         >
                             {{ step.label }}
                         </span>
@@ -86,13 +90,10 @@ const canNavigateTo = (step: number): boolean =>
             <div
                 role="region"
                 :aria-label="`Step ${store.currentStep} of ${steps.length}`"
-                class="bg-card border border-border rounded-xl p-6 shadow-sm"
+                class="rounded-xl border border-border bg-card p-6 shadow-sm"
             >
                 <Transition name="step" mode="out-in">
-                    <StepDates
-                        v-if="store.currentStep === 1"
-                        key="step-1"
-                    />
+                    <StepDates v-if="store.currentStep === 1" key="step-1" />
                     <StepRooms
                         v-else-if="store.currentStep === 2"
                         key="step-2"
@@ -120,7 +121,9 @@ const canNavigateTo = (step: number): boolean =>
 <style scoped>
 .step-enter-active,
 .step-leave-active {
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 .step-enter-from {
     opacity: 0;

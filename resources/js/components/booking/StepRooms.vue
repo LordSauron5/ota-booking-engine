@@ -49,8 +49,8 @@ function selectUnit(unit: Unit) {
     }
 
     store.selectedUnit = unit;
-    store.quantity     = 1;
-    store.guests       = { adults: 1, children: 0 };
+    store.quantity = 1;
+    store.guests = { adults: 1, children: 0 };
 }
 
 const isSelected = (unit: Unit) => store.selectedUnit?.id === unit.id;
@@ -71,8 +71,8 @@ function incrementQuantity() {
 }
 
 // ── Guests ────────────────────────────────────────────────────────────────
-const maxGuests = computed(() =>
-    (store.selectedUnit?.max_guests ?? 1) * store.quantity
+const maxGuests = computed(
+    () => (store.selectedUnit?.max_guests ?? 1) * store.quantity,
 );
 
 function decrementAdults() {
@@ -104,16 +104,17 @@ function incrementChildren() {
 
 <template>
     <div>
-        <h2 class="text-lg font-medium mb-1">Choose a room</h2>
-        <p class="text-sm text-muted-foreground mb-6">
+        <h2 class="mb-1 text-lg font-medium">Choose a room</h2>
+        <p class="mb-6 text-sm text-muted-foreground">
             Select a room type for your
-            <span class="font-medium text-foreground">{{ store.nights }}-night</span>
+            <span class="font-medium text-foreground"
+                >{{ store.nights }}-night</span
+            >
             stay.
         </p>
 
         <!-- Two column layout on md+, stacked on mobile -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
+        <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
             <!-- ── Left: Room cards ──────────────────────────────────── -->
             <div
                 class="flex flex-col gap-3"
@@ -124,53 +125,65 @@ function incrementChildren() {
                     v-for="unit in units"
                     :key="unit.id"
                     role="listitem"
-                    class="border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
+                    class="cursor-pointer overflow-hidden rounded-xl border transition-all duration-200"
                     :class="[
                         isSelected(unit)
                             ? 'border-primary ring-2 ring-primary/20'
                             : 'border-border hover:border-primary/40',
                         !isUnitSelectable(unit)
-                            ? 'opacity-50 cursor-not-allowed'
+                            ? 'cursor-not-allowed opacity-50'
                             : 'cursor-pointer',
                     ]"
                     :aria-selected="isSelected(unit)"
                     @click="selectUnit(unit)"
                 >
                     <!-- Image carousel -->
-                    <div class="relative h-40 bg-muted overflow-hidden">
+                    <div class="relative h-40 overflow-hidden bg-muted">
                         <img
                             :src="unit.pictures[getImageIndex(unit.id)]"
                             :alt="`${unit.name} — image ${getImageIndex(unit.id) + 1} of ${unit.pictures.length}`"
-                            class="w-full h-full object-cover"
+                            class="h-full w-full object-cover"
                         />
 
                         <template v-if="unit.pictures.length > 1">
                             <button
-                                class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                class="absolute top-1/2 left-2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                 :aria-label="`Previous image for ${unit.name}`"
-                                @click.stop="prevImage(unit.id, unit.pictures.length)"
+                                @click.stop="
+                                    prevImage(unit.id, unit.pictures.length)
+                                "
                             >
-                                <ChevronLeft class="w-3.5 h-3.5" aria-hidden="true" />
+                                <ChevronLeft
+                                    class="h-3.5 w-3.5"
+                                    aria-hidden="true"
+                                />
                             </button>
                             <button
-                                class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                class="absolute top-1/2 right-2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                 :aria-label="`Next image for ${unit.name}`"
-                                @click.stop="nextImage(unit.id, unit.pictures.length)"
+                                @click.stop="
+                                    nextImage(unit.id, unit.pictures.length)
+                                "
                             >
-                                <ChevronRight class="w-3.5 h-3.5" aria-hidden="true" />
+                                <ChevronRight
+                                    class="h-3.5 w-3.5"
+                                    aria-hidden="true"
+                                />
                             </button>
 
                             <div
-                                class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1"
+                                class="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1"
                                 aria-hidden="true"
                             >
                                 <span
                                     v-for="(_, i) in unit.pictures"
                                     :key="i"
-                                    class="w-1.5 h-1.5 rounded-full transition-colors"
-                                    :class="i === getImageIndex(unit.id)
-                                        ? 'bg-white'
-                                        : 'bg-white/50'"
+                                    class="h-1.5 w-1.5 rounded-full transition-colors"
+                                    :class="
+                                        i === getImageIndex(unit.id)
+                                            ? 'bg-white'
+                                            : 'bg-white/50'
+                                    "
                                 />
                             </div>
                         </template>
@@ -187,7 +200,7 @@ function incrementChildren() {
                         <!-- Unavailable overlay -->
                         <div
                             v-if="!isUnitSelectable(unit)"
-                            class="absolute inset-0 bg-background/70 flex items-center justify-center"
+                            class="absolute inset-0 flex items-center justify-center bg-background/70"
                             aria-hidden="true"
                         >
                             <Badge variant="secondary">Unavailable</Badge>
@@ -198,23 +211,31 @@ function incrementChildren() {
                     <div class="p-3">
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                <h3 class="font-medium text-foreground text-sm">
+                                <h3 class="text-sm font-medium text-foreground">
                                     {{ unit.name }}
                                 </h3>
-                                <p class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                <p
+                                    class="mt-0.5 line-clamp-2 text-xs text-muted-foreground"
+                                >
                                     {{ unit.description }}
                                 </p>
                             </div>
-                            <div class="text-right shrink-0">
-                                <p class="font-semibold text-foreground text-sm">
+                            <div class="shrink-0 text-right">
+                                <p
+                                    class="text-sm font-semibold text-foreground"
+                                >
                                     {{ formatPrice(unit.price) }}
                                 </p>
-                                <p class="text-xs text-muted-foreground">/ night</p>
+                                <p class="text-xs text-muted-foreground">
+                                    / night
+                                </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                            <Users class="w-3 h-3" aria-hidden="true" />
+                        <div
+                            class="mt-2 flex items-center gap-1 text-xs text-muted-foreground"
+                        >
+                            <Users class="h-3 w-3" aria-hidden="true" />
                             <span>Max {{ unit.max_guests }}</span>
                             <span aria-hidden="true">·</span>
                             <span>{{ unit.available_count }} available</span>
@@ -228,18 +249,18 @@ function incrementChildren() {
                 <!-- Empty state -->
                 <div
                     v-if="!store.selectedUnit"
-                    class="border border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center gap-3"
+                    class="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border p-8 text-center"
                     aria-label="No room selected"
                 >
                     <BedDouble
-                        class="w-8 h-8 text-muted-foreground/50"
+                        class="h-8 w-8 text-muted-foreground/50"
                         aria-hidden="true"
                     />
                     <div>
                         <p class="text-sm font-medium text-foreground">
                             Select a room
                         </p>
-                        <p class="text-xs text-muted-foreground mt-0.5">
+                        <p class="mt-0.5 text-xs text-muted-foreground">
                             Choose a room on the left to configure your stay
                         </p>
                     </div>
@@ -248,12 +269,14 @@ function incrementChildren() {
                 <!-- Configuration -->
                 <div
                     v-else
-                    class="border border-primary/30 bg-primary/5 rounded-xl p-4 flex flex-col gap-4"
+                    class="flex flex-col gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4"
                     aria-label="Configure your stay"
                 >
                     <!-- Selected room recap -->
                     <div>
-                        <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        <p
+                            class="mb-1 text-xs tracking-wide text-muted-foreground uppercase"
+                        >
                             Selected room
                         </p>
                         <p class="font-medium text-foreground">
@@ -266,7 +289,9 @@ function incrementChildren() {
                     <!-- Quantity counter -->
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-foreground">Rooms</p>
+                            <p class="text-sm font-medium text-foreground">
+                                Rooms
+                            </p>
                             <p class="text-xs text-muted-foreground">
                                 {{ maxQuantity }} available
                             </p>
@@ -277,12 +302,12 @@ function incrementChildren() {
                             aria-label="Number of rooms"
                         >
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.quantity <= 1"
                                 :aria-label="`Decrease rooms, currently ${store.quantity}`"
                                 @click="decrementQuantity"
                             >
-                                <Minus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Minus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                             <span
                                 class="w-6 text-center text-sm font-medium tabular-nums"
@@ -291,12 +316,12 @@ function incrementChildren() {
                                 {{ store.quantity }}
                             </span>
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.quantity >= maxQuantity"
                                 :aria-label="`Increase rooms, currently ${store.quantity}`"
                                 @click="incrementQuantity"
                             >
-                                <Plus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Plus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -304,7 +329,9 @@ function incrementChildren() {
                     <!-- Adults counter -->
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-foreground">Adults</p>
+                            <p class="text-sm font-medium text-foreground">
+                                Adults
+                            </p>
                             <p class="text-xs text-muted-foreground">Age 13+</p>
                         </div>
                         <div
@@ -313,12 +340,12 @@ function incrementChildren() {
                             aria-label="Number of adults"
                         >
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.guests.adults <= 1"
                                 :aria-label="`Decrease adults, currently ${store.guests.adults}`"
                                 @click="decrementAdults"
                             >
-                                <Minus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Minus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                             <span
                                 class="w-6 text-center text-sm font-medium tabular-nums"
@@ -327,12 +354,12 @@ function incrementChildren() {
                                 {{ store.guests.adults }}
                             </span>
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.totalGuests >= maxGuests"
                                 :aria-label="`Increase adults, currently ${store.guests.adults}`"
                                 @click="incrementAdults"
                             >
-                                <Plus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Plus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -340,8 +367,12 @@ function incrementChildren() {
                     <!-- Children counter -->
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-foreground">Children</p>
-                            <p class="text-xs text-muted-foreground">Ages 2–12</p>
+                            <p class="text-sm font-medium text-foreground">
+                                Children
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                Ages 2–12
+                            </p>
                         </div>
                         <div
                             class="flex items-center gap-3"
@@ -349,12 +380,12 @@ function incrementChildren() {
                             aria-label="Number of children"
                         >
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.guests.children <= 0"
                                 :aria-label="`Decrease children, currently ${store.guests.children}`"
                                 @click="decrementChildren"
                             >
-                                <Minus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Minus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                             <span
                                 class="w-6 text-center text-sm font-medium tabular-nums"
@@ -363,12 +394,12 @@ function incrementChildren() {
                                 {{ store.guests.children }}
                             </span>
                             <button
-                                class="w-8 h-8 rounded-full border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 :disabled="store.totalGuests >= maxGuests"
                                 :aria-label="`Increase children, currently ${store.guests.children}`"
                                 @click="incrementChildren"
                             >
-                                <Plus class="w-3.5 h-3.5" aria-hidden="true" />
+                                <Plus class="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -407,9 +438,13 @@ function incrementChildren() {
                             <span>{{ formatPrice(store.taxAmount) }}</span>
                         </div>
                         <Separator class="my-0.5" />
-                        <div class="flex justify-between font-semibold text-foreground">
+                        <div
+                            class="flex justify-between font-semibold text-foreground"
+                        >
                             <span>Total</span>
-                            <span aria-live="polite">{{ formatPrice(store.totalPrice) }}</span>
+                            <span aria-live="polite">{{
+                                formatPrice(store.totalPrice)
+                            }}</span>
                         </div>
                     </div>
                 </div>

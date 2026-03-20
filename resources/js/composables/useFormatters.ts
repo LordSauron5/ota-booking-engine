@@ -7,7 +7,10 @@ export function useFormatters() {
         }).format(amount);
 
     const formatDate = (dateStr: string | null) => {
-        if (!dateStr) return '—';
+        if (!dateStr) {
+            return '—';
+        }
+
         return new Intl.DateTimeFormat('en-ZA', { dateStyle: 'medium' }).format(
             new Date(dateStr + 'T00:00:00'),
         );

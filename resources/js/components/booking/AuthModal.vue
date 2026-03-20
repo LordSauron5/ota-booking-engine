@@ -11,31 +11,26 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { buildHeaders } from '@/composables/useHttp';
 import { useBookingStore } from '@/stores/bookingStore';
 
-const props = defineProps<{
+defineProps<{
     open: boolean;
 }>();
 
 const emit = defineEmits<{
     'update:open': [value: boolean];
-    'success': [];
+    success: [];
 }>();
 
 const store = useBookingStore();
 
-const activeTab    = ref<'login' | 'register'>('login');
+const activeTab = ref<'login' | 'register'>('login');
 const isSubmitting = ref(false);
 const errorMessage = ref<string | null>(null);
 
-const loginForm   = ref({ email: '', password: '' });
+const loginForm = ref({ email: '', password: '' });
 const loginErrors = ref<Record<string, string>>({});
 
 const registerForm = ref({
@@ -49,7 +44,7 @@ const registerErrors = ref<Record<string, string>>({});
 async function submitLogin() {
     isSubmitting.value = true;
     errorMessage.value = null;
-    loginErrors.value  = {};
+    loginErrors.value = {};
 
     try {
         await ensureCsrfCookie();
@@ -90,12 +85,15 @@ async function submitLogin() {
 
                 for (const key in errs) {
                     const val = errs[key];
-                    mapped[key] = Array.isArray(val) ? val.join(' ') : String(val ?? '');
+                    mapped[key] = Array.isArray(val)
+                        ? val.join(' ')
+                        : String(val ?? '');
                 }
 
                 loginErrors.value = mapped;
 
-                errorMessage.value = data?.message ?? Object.values(mapped)[0] ?? null;
+                errorMessage.value =
+                    data?.message ?? Object.values(mapped)[0] ?? null;
 
                 return;
             }
@@ -106,7 +104,6 @@ async function submitLogin() {
         }
 
         errorMessage.value = 'Login failed. Please try again.';
-
     } catch {
         errorMessage.value = 'A network error occurred. Please try again.';
     } finally {
@@ -115,8 +112,8 @@ async function submitLogin() {
 }
 
 async function submitRegister() {
-    isSubmitting.value   = true;
-    errorMessage.value   = null;
+    isSubmitting.value = true;
+    errorMessage.value = null;
     registerErrors.value = {};
 
     try {
@@ -156,12 +153,15 @@ async function submitRegister() {
 
                 for (const key in errs) {
                     const val = errs[key];
-                    mapped[key] = Array.isArray(val) ? val.join(' ') : String(val ?? '');
+                    mapped[key] = Array.isArray(val)
+                        ? val.join(' ')
+                        : String(val ?? '');
                 }
 
                 registerErrors.value = mapped;
 
-                errorMessage.value = data?.message ?? Object.values(mapped)[0] ?? null;
+                errorMessage.value =
+                    data?.message ?? Object.values(mapped)[0] ?? null;
 
                 return;
             }
@@ -172,7 +172,6 @@ async function submitRegister() {
         }
 
         errorMessage.value = 'Registration failed. Please try again.';
-
     } catch {
         errorMessage.value = 'A network error occurred. Please try again.';
     } finally {
@@ -182,15 +181,19 @@ async function submitRegister() {
 
 async function onAuthSuccess() {
     if (store.bookingId) {
-        const claimResponse = await fetch(`/bookings/${store.bookingId}/claim`, {
-            method: 'POST',
-            headers: buildHeaders(),
-        });
+        const claimResponse = await fetch(
+            `/bookings/${store.bookingId}/claim`,
+            {
+                method: 'POST',
+                headers: buildHeaders(),
+            },
+        );
 
         if (!claimResponse.ok && claimResponse.status !== 200) {
             const data = await claimResponse.json();
 
-            errorMessage.value = data.message ?? 'Could not link booking to your account.';
+            errorMessage.value =
+                data.message ?? 'Could not link booking to your account.';
 
             isSubmitting.value = false;
 
@@ -211,40 +214,40 @@ async function ensureCsrfCookie(): Promise<void> {
         credentials: 'same-origin',
     });
 }
-
 </script>
 
 <template>
-    <Dialog
-        :open="open"
-        @update:open="emit('update:open', $event)"
-    >
-        <DialogContent
-            class="sm:max-w-md"
-            aria-describedby="auth-modal-desc"
-        >
+    <Dialog :open="open" @update:open="emit('update:open', $event)">
+        <DialogContent class="sm:max-w-md" aria-describedby="auth-modal-desc">
             <DialogHeader>
                 <DialogTitle>Sign in to continue</DialogTitle>
                 <DialogDescription id="auth-modal-desc">
-                    Your booking details are saved. Signing in won't change anything.
+                    Your booking details are saved. Signing in won't change
+                    anything.
                 </DialogDescription>
             </DialogHeader>
 
             <Tabs v-model="activeTab" class="mt-2">
                 <TabsList class="w-full">
                     <TabsTrigger value="login" class="flex-1">
-                        <LogIn class="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                        <LogIn class="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                         Sign in
                     </TabsTrigger>
                     <TabsTrigger value="register" class="flex-1">
-                        <UserPlus class="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                        <UserPlus
+                            class="mr-1.5 h-3.5 w-3.5"
+                            aria-hidden="true"
+                        />
                         Create account
                     </TabsTrigger>
                 </TabsList>
 
                 <!-- Login tab -->
                 <TabsContent value="login" class="mt-4">
-                    <form class="flex flex-col gap-4" @submit.prevent="submitLogin">
+                    <form
+                        class="flex flex-col gap-4"
+                        @submit.prevent="submitLogin"
+                    >
                         <div class="flex flex-col gap-1.5">
                             <Label for="login-email">Email</Label>
                             <Input
@@ -253,7 +256,11 @@ async function ensureCsrfCookie(): Promise<void> {
                                 type="email"
                                 autocomplete="email"
                                 required
-                                :aria-describedby="loginErrors.email ? 'login-email-err' : undefined"
+                                :aria-describedby="
+                                    loginErrors.email
+                                        ? 'login-email-err'
+                                        : undefined
+                                "
                             />
                             <p
                                 v-if="loginErrors.email"
@@ -273,7 +280,11 @@ async function ensureCsrfCookie(): Promise<void> {
                                 type="password"
                                 autocomplete="current-password"
                                 required
-                                :aria-describedby="loginErrors.password ? 'login-pass-err' : undefined"
+                                :aria-describedby="
+                                    loginErrors.password
+                                        ? 'login-pass-err'
+                                        : undefined
+                                "
                             />
                             <p
                                 v-if="loginErrors.password"
@@ -293,10 +304,14 @@ async function ensureCsrfCookie(): Promise<void> {
                             {{ errorMessage }}
                         </p>
 
-                        <Button type="submit" :disabled="isSubmitting" class="w-full">
+                        <Button
+                            type="submit"
+                            :disabled="isSubmitting"
+                            class="w-full"
+                        >
                             <Loader2
                                 v-if="isSubmitting"
-                                class="w-4 h-4 mr-2 animate-spin"
+                                class="mr-2 h-4 w-4 animate-spin"
                                 aria-hidden="true"
                             />
                             {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
@@ -306,7 +321,10 @@ async function ensureCsrfCookie(): Promise<void> {
 
                 <!-- Register tab -->
                 <TabsContent value="register" class="mt-4">
-                    <form class="flex flex-col gap-4" @submit.prevent="submitRegister">
+                    <form
+                        class="flex flex-col gap-4"
+                        @submit.prevent="submitRegister"
+                    >
                         <div class="flex flex-col gap-1.5">
                             <Label for="reg-name">Name</Label>
                             <Input
@@ -315,7 +333,11 @@ async function ensureCsrfCookie(): Promise<void> {
                                 type="text"
                                 autocomplete="name"
                                 required
-                                :aria-describedby="registerErrors.name ? 'reg-name-err' : undefined"
+                                :aria-describedby="
+                                    registerErrors.name
+                                        ? 'reg-name-err'
+                                        : undefined
+                                "
                             />
                             <p
                                 v-if="registerErrors.name"
@@ -335,7 +357,11 @@ async function ensureCsrfCookie(): Promise<void> {
                                 type="email"
                                 autocomplete="email"
                                 required
-                                :aria-describedby="registerErrors.email ? 'reg-email-err' : undefined"
+                                :aria-describedby="
+                                    registerErrors.email
+                                        ? 'reg-email-err'
+                                        : undefined
+                                "
                             />
                             <p
                                 v-if="registerErrors.email"
@@ -355,7 +381,11 @@ async function ensureCsrfCookie(): Promise<void> {
                                 type="password"
                                 autocomplete="new-password"
                                 required
-                                :aria-describedby="registerErrors.password ? 'reg-pass-err' : undefined"
+                                :aria-describedby="
+                                    registerErrors.password
+                                        ? 'reg-pass-err'
+                                        : undefined
+                                "
                             />
                             <p
                                 v-if="registerErrors.password"
@@ -386,13 +416,21 @@ async function ensureCsrfCookie(): Promise<void> {
                             {{ errorMessage }}
                         </p>
 
-                        <Button type="submit" :disabled="isSubmitting" class="w-full">
+                        <Button
+                            type="submit"
+                            :disabled="isSubmitting"
+                            class="w-full"
+                        >
                             <Loader2
                                 v-if="isSubmitting"
-                                class="w-4 h-4 mr-2 animate-spin"
+                                class="mr-2 h-4 w-4 animate-spin"
                                 aria-hidden="true"
                             />
-                            {{ isSubmitting ? 'Creating account...' : 'Create account' }}
+                            {{
+                                isSubmitting
+                                    ? 'Creating account...'
+                                    : 'Create account'
+                            }}
                         </Button>
                     </form>
                 </TabsContent>
