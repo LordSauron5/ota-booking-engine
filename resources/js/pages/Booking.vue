@@ -25,7 +25,10 @@ const steps = [
 ];
 
 const canNavigateTo = (step: number): boolean =>
-    step <= store.currentStep || (step === 2 && store.stepOneValid);
+    step <= store.currentStep ||
+    (step === 2 && store.stepOneValid) ||
+    (step === 3 && store.stepOneValid && store.stepTwoValid);
+
 </script>
 
 <template>

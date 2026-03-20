@@ -32,6 +32,10 @@ export const useBookingStore = defineStore('booking', () => {
     const quantity        = ref<number>(1);
     const guests          = ref<Guests>({ adults: 1, children: 0 });
 
+    // --- Booking Metadata ----------------------------------
+    const bookingId   = ref<number | null>(null);
+    const reference   = ref<string | null>(null);
+
     // --- Computed ----------------------------------
     const nights = computed<number>(() => {
         if (!checkIn.value || !checkOut.value) {
@@ -97,11 +101,14 @@ export const useBookingStore = defineStore('booking', () => {
         selectedUnit.value = null;
         quantity.value    = 1;
         guests.value      = { adults: 1, children: 0 };
+        bookingId.value   = null;
+        reference.value   = null;
     }
 
     return {
         currentStep, checkIn, checkOut,
         selectedUnit, quantity, guests,
+        bookingId, reference,
         nights, basePrice, taxAmount, totalPrice, totalGuests,
         goToStep, nextStep, prevStep, reset,
         stepOneValid, stepTwoValid,
