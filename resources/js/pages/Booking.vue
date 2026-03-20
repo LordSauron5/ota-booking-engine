@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import BookingNav  from '@/components/booking/BookingNav.vue';
 import StepConfirm from '@/components/booking/StepConfirm.vue';
 import StepDates   from '@/components/booking/StepDates.vue';
 import StepRooms   from '@/components/booking/StepRooms.vue';
@@ -34,7 +35,11 @@ const canNavigateTo = (step: number): boolean =>
 <template>
     <div class="min-h-screen bg-background">
 
+        <!-- Persistent nav — always visible across all steps -->
+        <BookingNav :property-name="property.name" />
+        
         <div class="max-w-3xl mx-auto py-10 px-4">
+            
 
             <!-- Stepper nav -->
             <nav aria-label="Booking steps" class="mb-10">
