@@ -93,6 +93,7 @@ const canNavigateTo = (step: number): boolean =>
                     <StepSummary
                         v-else-if="store.currentStep === 3"
                         key="step-3"
+                        :property="property"
                     />
                     <StepConfirm
                         v-else-if="store.currentStep === 4"
