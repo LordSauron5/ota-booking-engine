@@ -33,7 +33,27 @@ async function confirmBooking() {
     isConfirming.value = true;
     confirmError.value = null;
 
-    console.log('Confirming booking with ID:', store.bookingId);
+    try {
+        const response = await fetch(`/bookings/${store.bookingId}/confirm`, {
+            method: 'POST',
+            headers: buildHeaders(),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            confirmError.value = data.message ?? 'Something went wrong.';
+
+            return;
+        }
+
+        store.nextStep();
+
+    } catch {
+        confirmError.value = 'A network error occurred. Please try again.';
+    } finally {
+        isConfirming.value = false;
+    }
 }
 
 </script>

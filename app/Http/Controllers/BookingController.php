@@ -60,4 +60,30 @@ class BookingController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function confirm(Request $request, Booking $booking): JsonResponse
+    {
+        if (! auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if ($booking->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $unit = collect($this->roomService->getRooms())
+            ->firstWhere('id', $booking->unit_id);
+
+        if (! $unit) {
+            return response()->json(['message' => 'Room no longer available.'], 422);
+        }
+
+        $result = $this->bookingService->confirmDraft($booking, $unit);
+
+        if ($result !== true) {
+            return response()->json(['message' => $result], 422);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

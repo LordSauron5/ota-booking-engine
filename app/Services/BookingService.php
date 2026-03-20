@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Jobs\BookWithChannelManager;
 use App\Models\Booking;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BookingService
@@ -98,6 +100,82 @@ class BookingService
         }
 
         $booking->update(['user_id' => auth()->id()]);
+
+        return true;
+    }
+
+    // ── Confirm ───────────────────────────────────────────────────────────
+
+    /**
+     * Transition a draft to pending inside a transaction, then dispatch
+     * the channel-manager job.
+     *
+     * The transaction acquires a row lock before the availability check so
+     * two concurrent confirmations for the same unit/dates can't both succeed.
+     *
+     * Returns true on success, or a string error message on failure.
+     */
+    public function confirmDraft(Booking $booking, array $unit): true|string
+    {
+        if ($booking->status !== 'draft') {
+            return 'This booking has already been submitted.';
+        }
+
+        try {
+            DB::transaction(function () use ($booking, $unit) {
+                // Hard availability check with row lock
+                $booked = Booking::where('unit_id', $booking->unit_id)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->where('check_in', '<', $booking->check_out)
+                    ->where('check_out', '>', $booking->check_in)
+                    ->where('id', '!=', $booking->id)
+                    ->lockForUpdate()
+                    ->count();
+
+                if ($booked >= $unit['available_count']) {
+                    throw new \RuntimeException(
+                        'This room is no longer available for the selected dates.'
+                    );
+                }
+
+                // Reprice one final time — never trust a stale draft value
+                $pricing = $this->calculatePricing(
+                    $unit,
+                    $booking->check_in,
+                    $booking->check_out,
+                    $booking->quantity,
+                );
+
+                $booking->update([
+                    'base_price'  => $pricing['basePrice'],
+                    'tax_amount'  => $pricing['taxAmount'],
+                    'total_price' => $pricing['total'],
+                    'status'      => 'pending',
+                ]);
+
+                dispatch(new BookWithChannelManager($booking));
+            });
+        } catch (\RuntimeException $e) {
+            return $e->getMessage();
+        }
+
+        return true;
+    }
+
+    // ── Retry ─────────────────────────────────────────────────────────────
+
+    /**
+     * Re-queue a failed booking for another channel-manager attempt.
+     */
+    public function retryFailed(Booking $booking): true|string
+    {
+        if ($booking->status !== 'failed') {
+            return 'Only failed bookings can be retried.';
+        }
+
+        $booking->update(['status' => 'pending']);
+
+        dispatch(new BookWithChannelManager($booking));
 
         return true;
     }
